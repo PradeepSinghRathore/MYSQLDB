@@ -1,0 +1,56 @@
+---
+- name: setup replication 
+  hosts: Mysql_Slave
+  tasks:
+    - name: edit a file
+      lineinfile:
+           path: /etc/my.cnf
+           line: innodb_buffer_pool_size = 128M
+
+    - name: edit a file for replication setup
+      blockinfile:
+        path: /etc/my.cnf
+        block: |
+          [mysqld] 
+
+    - name: edit a file for replication setup
+      lineinfile:
+          path: /etc/my.cnf
+          line: server-id=2
+
+
+    - name: stop slave
+      mysql_replication:
+              mode: stopslave
+              login_user: root
+              login_password: Hitachi@123
+              login_unix_socket: /var/lib/mysql/mysql.sock
+
+    - name: change master 
+      community.mysql.mysql_query:
+        login_user: root
+        login_password: Hitachi@123
+        login_host: all
+        login_unix_socket: /var/lib/mysql/mysql.sock
+        query: CHANGE MASTER TO MASTER_HOST='192.168.101.46', MASTER_USER='replication_user', MASTER_PASSWORD='Hitachi@123', MASTER_LOG_FILE='binlog.000001', MASTER_LOG_POS=1208  
+        single_transaction: true
+
+    - name: start slave
+      mysql_replication:
+              mode: startslave
+              login_user: root
+              login_password: Hitachi@123
+              login_unix_socket: /var/lib/mysql/mysql.sock
+
+    - name: restart the mysqld
+      service:
+         name: mysqld
+         state: restarted
+              
+    - name: get slave replica 
+      mysql_replication:
+               mode: getslave
+               login_user: root
+               login_password: Hitachi@123
+               login_unix_socket: /var/lib/mysql/mysql.sock
+

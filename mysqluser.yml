@@ -1,0 +1,12 @@
+---
+- name: create a mysql user 
+  hosts: Mysql_Slave
+  tasks:
+    - name: create a mysql user
+      mysql_user: 
+        name: pradeep
+        password: Hitachi@123
+        priv: '*.*:ALL'
+        state: present
+        login_user: root
+        login_password: "Hitachi@123"

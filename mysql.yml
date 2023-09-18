@@ -1,0 +1,8 @@
+---
+- name: create a mysql user 
+  hosts: 192.168.101.46
+  tasks:
+    - name: create a mysql user 
+      mysql_user:
+            name: bob
+

@@ -1,0 +1,52 @@
+---
+- name: edit a file
+  hosts: Mysql_Master
+  tasks:
+    - name: edit a file for replication setup
+      lineinfile:
+           path: /etc/my.cnf
+           line: innodb_buffer_pool_size = 128M 
+
+    - name: edit a file for replication setup 
+      blockinfile:
+        path: /etc/my.cnf
+        block: |
+          [mysqld]
+
+    - name: edit a file for replication setup
+      lineinfile:
+        path: /etc/my.cnf
+        line: server-id=1
+
+
+    - name: create a replication user 
+      community.mysql.mysql_query:
+        login_user: root
+        login_password: Hitachi@123
+        login_host: all
+        login_unix_socket: /var/lib/mysql/mysql.sock
+        query: CREATE USER 'replication_user'@'%' IDENTIFIED WITH 'mysql_native_password' BY 'Hitachi@123'
+        single_transaction: true
+
+    - name: create a replication user 
+      community.mysql.mysql_query:
+        login_user: root
+        login_password: Hitachi@123
+        login_host: all
+        login_unix_socket: /var/lib/mysql/mysql.sock
+        query: GRANT REPLICATION SLAVE ON *.* TO 'replication_user'@'%'
+        single_transaction: true
+    
+    - name: mysql dump backup 
+      shell: mysqldump -u root --all-databases --source-data=2 --log-error=/err.log --verbose -pHitachi@123 > backup.sql
+
+     
+    - name: check binory file and log file
+      command:  head -n 30 backup.sql
+
+    - name: restart mysqld
+      service:
+         name: mysqld
+         state: restarted
+
+
